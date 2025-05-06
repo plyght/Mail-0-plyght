@@ -2,6 +2,7 @@ import { pgTableCreator, text, timestamp, boolean, integer, jsonb, primaryKey } 
 import { defaultUserSettings } from '@zero/db/user_settings_default';
 import { unique } from 'drizzle-orm/pg-core';
 import type { WritingStyleMatrix } from '@zero/mail/services/writing-style-service';
+import type { ThemeConfig } from './theme_config';
 
 export const createTable = pgTableCreator((name) => `mail0_${name}`);
 
@@ -146,4 +147,16 @@ export const writingStyleMatrix = createTable('writing_style_matrix', {
       columns: [table.connectionId],
     }),
   ]
+})
+
+export const themes = createTable('themes', {
+  id: text('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  config: jsonb('config').$type<ThemeConfig>().notNull(),
+  isPublic: boolean('is_public').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow().$onUpdate(() => new Date()),
 })
